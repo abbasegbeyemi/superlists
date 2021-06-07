@@ -12,6 +12,11 @@ class NewVisitorTest(unittest.TestCase):
     def tearDown(self) -> None:
         self.browser.quit()
 
+    def check_for_row_in_list_table(self, row_text):
+        table = self.browser.find_element_by_id("id_list_table")
+        rows = table.find_elements_by_tag_name("tr")
+        self.assertIn(row_text, [row.text for row in rows])
+
     def test_can_start_a_list_and_retrieve_it_later(self):
         # Edith has heard about a new online todolist app. She has gone
         # to checkout its homepage"
@@ -36,6 +41,7 @@ class NewVisitorTest(unittest.TestCase):
         # "1: Buy LG Ultrafine Display" as an item in a to-do list
         inputbox.send_keys(Keys.ENTER)
         time.sleep(1)
+        self.check_for_row_in_list_table("1: Buy LG ultrafine display")
 
         # There is still a textbox inviting her to add another item. She enters
         # "Mount mac mini under desk"
@@ -44,13 +50,9 @@ class NewVisitorTest(unittest.TestCase):
         inputbox.send_keys("Mount mac mini under desk")
         inputbox.send_keys(Keys.ENTER)
         time.sleep(1)
+        self.check_for_row_in_list_table("1: Buy LG ultrafine display")
+        self.check_for_row_in_list_table("2: Mount mac mini under desk")
 
-        table = self.browser.find_element_by_id("id_list_table")
-        rows = table.find_elements_by_tag_name("tr")
-
-        self.assertIn("1: Buy LG ultrafine display", [row.text for row in rows])
-
-        self.assertIn("2: Mount mac mini under the desk", [row.text for row in rows])
         self.fail("Finish the test!")
 
         # The page updates again and both items now appear in her lists
