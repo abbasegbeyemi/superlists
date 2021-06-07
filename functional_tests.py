@@ -30,22 +30,27 @@ class NewVisitorTest(unittest.TestCase):
         )
 
         # She types "Buy LG Ultrafine Display" into a text box
-        inputbox.send_keys("Buy LG Ultrafine Display")
+        inputbox.send_keys("Buy LG ultrafine display")
 
         # When she hits enter, the page updates and now the page lists
         # "1: Buy LG Ultrafine Display" as an item in a to-do list
         inputbox.send_keys(Keys.ENTER)
         time.sleep(1)
 
-        table = self.browser.find_element_by_id("id_list_table")
-        rows = table.find_elements_by_tag_name("tr")
-        self.assertTrue(
-            any(row.text == "1: Buy Ultrafine Display" for row in rows),
-            "New to-do item does not appear in table."
-        )
-
         # There is still a textbox inviting her to add another item. She enters
         # "Mount mac mini under desk"
+
+        inputbox = self.browser.find_element_by_id("id_new_item")
+        inputbox.send_keys("Mount mac mini under desk")
+        inputbox.send_keys(Keys.ENTER)
+        time.sleep(1)
+
+        table = self.browser.find_element_by_id("id_list_table")
+        rows = table.find_elements_by_tag_name("tr")
+
+        self.assertIn("1: Buy LG ultrafine display", [row.text for row in rows])
+
+        self.assertIn("2: Mount mac mini under the desk", [row.text for row in rows])
         self.fail("Finish the test!")
 
         # The page updates again and both items now appear in her lists

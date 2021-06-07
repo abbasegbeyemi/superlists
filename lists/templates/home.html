@@ -9,8 +9,18 @@
 </head>
 <body>
 <h1>Your To-Do List</h1>
-<input style="border: blue 2px solid; font-weight: bold" type="text"placeholder="Enter a to-do item" id="id_new_item">
-<label for="id_new_item" style="display: none"></label>
-<table id="id_list_table"></table>
+<form method="post">
+    {% csrf_token %}
+    <input style="border: blue 2px solid; font-weight: bold" type="text"
+           placeholder="Enter a to-do item"
+           id="id_new_item"
+           name="item_text"
+    >
+    <label for="id_new_item" style="display: none"></label></form>
+<table id="id_list_table">
+    <tr>
+        <td>1: {{ new_item_text }}</td>
+    </tr>
+</table>
 </body>
 </html>
