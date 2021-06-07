@@ -64,3 +64,4 @@ class NewVisitorTest(unittest.TestCase):
         # She visits the URL and sees that her list is still there.
 
         # Satisfied, she goes back to sleep
+
