@@ -70,10 +70,8 @@ class NewVisitorTest(LiveServerTestCase):
     def test_multiple_users_can_start_lists_at_different_urls(self):
         # Edith starts a new to-do list
         self.browser.get(self.live_server_url)
-        input_box = self.browser.find_element_by_id("id_new_item")
-        input_box.send_keys("Buy new Apple M1 Mac")
-        input_box.send_keys(Keys.ENTER)
-        self.wait_for_row_in_list_table("1: Buy new Apple M1 Mac")
+        self.enter_value_into_textbox("Buy LG ultrafine display")
+        self.wait_for_row_in_list_table("1: Buy LG ultrafine display")
 
         # She notices that her list has a unique url
         edith_list_url = self.browser.current_url
