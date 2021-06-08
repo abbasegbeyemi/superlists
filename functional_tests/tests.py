@@ -15,7 +15,7 @@ class NewVisitorTest(LiveServerTestCase):
     def tearDown(self) -> None:
         self.browser.quit()
 
-    def wait_for_row_in_list_table(self, row_text):
+    def wait_for_row_in_list_table(self, row_text: str) -> None:
         start_time = time.time()
         while True:
             try:
@@ -28,7 +28,12 @@ class NewVisitorTest(LiveServerTestCase):
                     raise e
                 time.sleep(0.5)
 
-    def test_can_start_a_list_and_retrieve_it_later(self):
+    def enter_value_into_textbox(self, text: str):
+        inputbox = self.browser.find_element_by_id("id_new_item")
+        inputbox.send_keys(text)
+        inputbox.send_keys(Keys.ENTER)
+
+    def test_can_start_a_list_for_a_single_user(self):
         # Edith has heard about a new online todolist app. She has gone
         # to checkout its homepage"
         self.browser.get(self.live_server_url)
@@ -46,30 +51,58 @@ class NewVisitorTest(LiveServerTestCase):
         )
 
         # She types "Buy LG Ultrafine Display" into a text box
-        inputbox.send_keys("Buy LG ultrafine display")
-
         # When she hits enter, the page updates and now the page lists
         # "1: Buy LG Ultrafine Display" as an item in a to-do list
-        inputbox.send_keys(Keys.ENTER)
+        self.enter_value_into_textbox("Buy LG ultrafine display")
         self.wait_for_row_in_list_table("1: Buy LG ultrafine display")
 
         # There is still a textbox inviting her to add another item. She enters
         # "Mount mac mini under desk"
 
-        inputbox = self.browser.find_element_by_id("id_new_item")
-        inputbox.send_keys("Mount mac mini under desk")
-        inputbox.send_keys(Keys.ENTER)
+        self.enter_value_into_textbox("Mount mac mini under desk")
+
+        # The page updates again and both items now appear in her lists
         self.wait_for_row_in_list_table("1: Buy LG ultrafine display")
         self.wait_for_row_in_list_table("2: Mount mac mini under desk")
 
-        self.fail("Finish the test!")
-
-        # The page updates again and both items now appear in her lists
-
-        # She wonders if the site will remember her list. She notices that the
-        # site has generated a unique URL for her. There is some explanatory text
-        # to that effect.
-
-        # She visits the URL and sees that her list is still there.
-
         # Satisfied, she goes back to sleep
+
+    def test_multiple_users_can_start_lists_at_different_urls(self):
+        # Edith starts a new to-do list
+        self.browser.get(self.live_server_url)
+        input_box = self.browser.find_element_by_id("id_new_item")
+        input_box.send_keys("Buy new Apple M1 Mac")
+        input_box.send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table("1: Buy new Apple M1 Mac")
+
+        # She notices that her list has a unique url
+        edith_list_url = self.browser.current_url
+        self.assertRegex(edith_list_url, "/lists/.+")
+
+        # Another user called Samuel visits the home page.
+
+        # We use a new browser session to make sure that no information of Edith's is coming through cookies etc
+        self.browser.quit()
+        self.browser = webdriver.Firefox()
+
+        # Francis visits the home page, there is no sign of Edith's list
+        self.browser.get(self.live_server_url)
+        page_text = self.browser.find_element_by_tag_name("body").text
+        self.assertNotIn("Buy LG ultrafine display", page_text)
+        self.assertNotIn("mac mini", page_text)
+
+        # Francis starts a new list bu entering a new item
+        self.enter_value_into_textbox("Buy a new PS5")
+        self.wait_for_row_in_list_table("1: Buy a new PS5")
+
+        # Francis gets his own unique URL
+        francis_list_url = self.browser.current_url
+        self.assertRegex(francis_list_url, "/lists/.+")
+        self.assertNotEqual(francis_list_url, edith_list_url)
+
+        # Again there is no sign of Edith's list
+        page_text = self.browser.find_element_by_tag_name("body").text
+        self.assertNotIn("Buy LG ultrafine display", page_text)
+        self.assertIn("Buy a new PS5", page_text)
+
+        # Satisfied they both go back to sleep
