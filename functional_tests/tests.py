@@ -33,6 +33,26 @@ class NewVisitorTest(LiveServerTestCase):
         inputbox.send_keys(text)
         inputbox.send_keys(Keys.ENTER)
 
+    def test_layout_and_styling(self):
+        # Edith goes to the home page
+        self.browser.get(self.live_server_url)
+        self.browser.set_window_size(1024, 768)
+
+        # She notices that the input box is nicely centered
+        inputbox = self.browser.find_element_by_id("id_new_item")
+        self.assertAlmostEqual(
+            inputbox.location["x"] + inputbox.size["width"] / 2, 512, delta=10
+        )
+
+        # She starts a new list and sees tha the input is nicely centered there too
+        self.enter_value_into_textbox("testing")
+        self.wait_for_row_in_list_table("1: testing")
+
+        inputbox = self.browser.find_element_by_id("id_new_item")
+        self.assertAlmostEqual(
+            inputbox.location["x"] + inputbox.size["width"] / 2, 512, delta=10
+        )
+
     def test_can_start_a_list_for_a_single_user(self):
         # Edith has heard about a new online todolist app. She has gone
         # to checkout its homepage"
