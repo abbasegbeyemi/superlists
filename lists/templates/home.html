@@ -9,7 +9,7 @@
 </head>
 <body>
 <h1>Start a new To-Do List</h1>
-<form method="post" action="/">
+<form method="post" action="/lists/new">
     {% csrf_token %}
     <input style="border: blue 2px solid; font-weight: bold" type="text"
            placeholder="Enter a to-do item"
