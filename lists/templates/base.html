@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>To-Do Lists</title>
+    <link href="lists/static/bootstrap/css/bootstrap.css" rel="stylesheet">
+</head>
+<body>
+<h1>{% block header_text %}{% endblock %}</h1>
+<form method="post" action="{% block form_action %}{% endblock %}">
+    {% csrf_token %}
+    <input type="text"
+           placeholder="Enter a to-do item"
+           id="id_new_item"
+           name="item_text">
+    <label for="id_new_item" style="display: none"></label></form>
+{% block table %}{% endblock %}
+</body>
+</html>
