@@ -18,10 +18,7 @@ services:
     build: ./nginx
     volumes:
       - static_volume:/home/app/web/static
-      - /tmp:/tmp
-#    tmpfs:
-#      - /tmp
-#    ports:
+      - ./sockets:/home/app/sockets
 #      - 1337:80
     depends_on:
       - web
