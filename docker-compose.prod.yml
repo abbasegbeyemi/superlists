@@ -18,8 +18,8 @@ services:
     build: ./nginx
     volumes:
       - static_volume:/home/app/web/static
-    ports:
-      - 1337:80
+      - ./sockets:/home/app/sockets
+#      - 1337:80
     depends_on:
       - web
   db:
