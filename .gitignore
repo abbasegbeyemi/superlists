@@ -3,6 +3,5 @@ geckodriver.log
 .idea
 __pycache__
 *.pyc
-/staticfiles
-/env/*
+/.env.*
 /.env
