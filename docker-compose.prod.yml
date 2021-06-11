@@ -18,6 +18,7 @@ services:
     build: ./nginx
     volumes:
       - static_volume:/home/app/web/static
+      - /tmp/staging.superlists.abbase.xyz.sock:/tmp/staging.superlists.abbase.xyz.sock
     tmpfs:
       - /tmp
 #    ports:
