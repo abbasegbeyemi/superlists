@@ -69,7 +69,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'superlists.wsgi.application'
-
+# Remove this
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
