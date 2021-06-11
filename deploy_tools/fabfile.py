@@ -46,12 +46,12 @@ def _create_or_update_dotenvs():
         new_password = ''.join(random.SystemRandom().choices(
             "abcdefghijklmnopqrstuvwxyz0123456789", k=10
         ))
-        append('.env.prod', f'SQL_PASSWORD={new_password}')
-        append('.env.prod.db', f'POSTGRES_PASSWORD={new_password}')
+        append(".env.prod", f'SQL_PASSWORD={new_password}')
+        append(".env.prod.db", f'POSTGRES_PASSWORD={new_password}')
 
 
 def deploy():
-    site_folder = f"home/{env.user}/sites/superlists/{env.sitename}"
+    site_folder = f"/home/{env.user}/sites/superlists/{env.sitename}"
     run(f"mkdir -p {site_folder}")
 
     with cd(site_folder):
