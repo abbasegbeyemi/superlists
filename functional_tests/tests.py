@@ -12,19 +12,18 @@ MAX_WAIT = 10
 
 class NewVisitorTest(StaticLiveServerTestCase):
 
-    @classmethod
-    def setUpClass(cls):
-        cls.host = "web"
-        cls.selenium = webdriver.Remote(
+    def setUp(self):
+        self.host = "web"
+        self.selenium = webdriver.Remote(
             command_executor=os.environ['SELENIUM_HOST'],
             desired_capabilities=DesiredCapabilities.FIREFOX,
         )
         staging_server = os.environ.get("STAGING_SERVER")
         if staging_server:
-            cls.live_server_url = f"http://{staging_server}"
+            self.live_server_url = f"http://{staging_server}"
         else:
-            cls.live_server_url = f'http://{os.environ.get("DJANGO_LIVE_TEST_SERVER_ADDRESS")}'
-        super(NewVisitorTest, cls).setUpClass()
+            self.live_server_url = f'http://{os.environ.get("DJANGO_LIVE_TEST_SERVER_ADDRESS")}'
+        super(NewVisitorTest, self).setUp()
 
     def tearDown(self):
         self.selenium.quit()

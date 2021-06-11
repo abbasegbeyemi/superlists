@@ -7,14 +7,13 @@ services:
     command: gunicorn superlists.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - .:/usr/src/app/
-      - static_volume:/home/app/web/staticfiles
+      - static_volume:/usr/src/app/static
     expose:
       - 8000
     env_file:
       - .env
     depends_on:
       - db
-      - selenium
   db:
     container_name: db
     image: postgres:12.0-alpine
@@ -30,7 +29,7 @@ services:
     ports:
       - 1337:80
     volumes:
-      - static_volume:/home/app/web/static
+      - static_volume:/usr/src/app/static
     depends_on:
       - web
   selenium:
