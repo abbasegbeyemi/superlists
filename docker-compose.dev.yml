@@ -27,7 +27,9 @@ services:
       - POSTGRES_DB=superlists_dev
   nginx:
     container_name: nginx
-    build: ./nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.dev
     ports:
       - 1337:80
     volumes:
