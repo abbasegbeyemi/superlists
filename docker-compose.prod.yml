@@ -19,7 +19,8 @@ services:
     volumes:
       - static_volume:/home/app/web/static
       - ./sockets:/home/app/sockets
-#      - 1337:80
+    ports:
+    - 1337:80
     depends_on:
       - web
   db:
