@@ -2,11 +2,43 @@ version: '3.7'
 
 services:
   web:
+    container_name: web
     build: .
-    command: gunicorn superlists.wsgi:application
+    command: gunicorn superlists.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - .:/usr/src/app/
-    ports:
-      - 8000:8000
+      - static_volume:/home/app/web/staticfiles
+    expose:
+      - 8000
     env_file:
-      - ./.env
+      - .env
+    depends_on:
+      - db
+      - selenium
+  db:
+    container_name: db
+    image: postgres:12.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=superlists
+      - POSTGRES_PASSWORD=superlists
+      - POSTGRES_DB=superlists_dev
+  nginx:
+    container_name: nginx
+    build: ./nginx
+    ports:
+      - 1337:80
+    volumes:
+      - static_volume:/home/app/web/static
+    depends_on:
+      - web
+  selenium:
+    container_name: selenium
+    image: selenium/standalone-firefox
+    expose:
+      - "4444"
+
+volumes:
+  postgres_data:
+  static_volume:

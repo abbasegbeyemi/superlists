@@ -3,6 +3,7 @@ import os
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.common.exceptions import WebDriverException
+from selenium.webdriver import DesiredCapabilities
 from selenium.webdriver.common.keys import Keys
 import time
 
@@ -11,20 +12,29 @@ MAX_WAIT = 10
 
 class NewVisitorTest(StaticLiveServerTestCase):
 
-    def setUp(self) -> None:
-        self.browser = webdriver.Firefox()
+    @classmethod
+    def setUpClass(cls):
+        cls.host = "web"
+        cls.selenium = webdriver.Remote(
+            command_executor=os.environ['SELENIUM_HOST'],
+            desired_capabilities=DesiredCapabilities.FIREFOX,
+        )
         staging_server = os.environ.get("STAGING_SERVER")
         if staging_server:
-            self.live_server_url = f"http://{staging_server}"
+            cls.live_server_url = f"http://{staging_server}"
+        else:
+            cls.live_server_url = f'http://{os.environ.get("DJANGO_LIVE_TEST_SERVER_ADDRESS")}'
+        super(NewVisitorTest, cls).setUpClass()
 
-    def tearDown(self) -> None:
-        self.browser.quit()
+    def tearDown(self):
+        self.selenium.quit()
+        super(NewVisitorTest, self).tearDown()
 
     def wait_for_row_in_list_table(self, row_text: str) -> None:
         start_time = time.time()
         while True:
             try:
-                table = self.browser.find_element_by_id("id_list_table")
+                table = self.selenium.find_element_by_id("id_list_table")
                 rows = table.find_elements_by_tag_name("tr")
                 self.assertIn(row_text, [row.text for row in rows])
                 return
@@ -34,17 +44,17 @@ class NewVisitorTest(StaticLiveServerTestCase):
                 time.sleep(0.5)
 
     def enter_value_into_textbox(self, text: str):
-        inputbox = self.browser.find_element_by_id("id_new_item")
+        inputbox = self.selenium.find_element_by_id("id_new_item")
         inputbox.send_keys(text)
         inputbox.send_keys(Keys.ENTER)
 
     def test_layout_and_styling(self):
         # Edith goes to the home page
-        self.browser.get(self.live_server_url)
-        self.browser.set_window_size(1024, 768)
+        self.selenium.get(self.live_server_url)
+        self.selenium.set_window_size(1024, 768)
 
         # She notices that the input box is nicely centered
-        inputbox = self.browser.find_element_by_id("id_new_item")
+        inputbox = self.selenium.find_element_by_id("id_new_item")
         self.assertAlmostEqual(
             inputbox.location["x"] + inputbox.size["width"] / 2, 512, delta=10
         )
@@ -53,7 +63,7 @@ class NewVisitorTest(StaticLiveServerTestCase):
         self.enter_value_into_textbox("testing")
         self.wait_for_row_in_list_table("1: testing")
 
-        inputbox = self.browser.find_element_by_id("id_new_item")
+        inputbox = self.selenium.find_element_by_id("id_new_item")
         self.assertAlmostEqual(
             inputbox.location["x"] + inputbox.size["width"] / 2, 512, delta=10
         )
@@ -61,15 +71,15 @@ class NewVisitorTest(StaticLiveServerTestCase):
     def test_can_start_a_list_for_a_single_user(self):
         # Edith has heard about a new online todolist app. She has gone
         # to checkout its homepage"
-        self.browser.get(self.live_server_url)
+        self.selenium.get(self.live_server_url)
 
         # She notices the page title and header mention to-do lists.
-        self.assertIn("To-Do", self.browser.title)
-        header_text = self.browser.find_element_by_tag_name("h1").text
+        self.assertIn("To-Do", self.selenium.title)
+        header_text = self.selenium.find_element_by_tag_name("h1").text
         self.assertIn("To-Do", header_text)
 
         # She is invited to enter a to-do item straight away
-        inputbox = self.browser.find_element_by_id("id_new_item")
+        inputbox = self.selenium.find_element_by_id("id_new_item")
         self.assertEqual(
             inputbox.get_attribute("placeholder"),
             'Enter a to-do item'
@@ -94,23 +104,26 @@ class NewVisitorTest(StaticLiveServerTestCase):
 
     def test_multiple_users_can_start_lists_at_different_urls(self):
         # Edith starts a new to-do list
-        self.browser.get(self.live_server_url)
+        self.selenium.get(self.live_server_url)
         self.enter_value_into_textbox("Buy LG ultrafine display")
         self.wait_for_row_in_list_table("1: Buy LG ultrafine display")
 
         # She notices that her list has a unique url
-        edith_list_url = self.browser.current_url
+        edith_list_url = self.selenium.current_url
         self.assertRegex(edith_list_url, "/lists/.+")
 
         # Another user called Samuel visits the home page.
 
-        # We use a new browser session to make sure that no information of Edith's is coming through cookies etc
-        self.browser.quit()
-        self.browser = webdriver.Firefox()
+        # We use a new selenium session to make sure that no information of Edith's is coming through cookies etc
+        self.selenium.quit()
+        self.selenium = webdriver.Remote(
+            command_executor=os.environ['SELENIUM_HOST'],
+            desired_capabilities=DesiredCapabilities.FIREFOX,
+        )
 
         # Francis visits the home page, there is no sign of Edith's list
-        self.browser.get(self.live_server_url)
-        page_text = self.browser.find_element_by_tag_name("body").text
+        self.selenium.get(self.live_server_url)
+        page_text = self.selenium.find_element_by_tag_name("body").text
         self.assertNotIn("Buy LG ultrafine display", page_text)
         self.assertNotIn("mac mini", page_text)
 
@@ -119,12 +132,12 @@ class NewVisitorTest(StaticLiveServerTestCase):
         self.wait_for_row_in_list_table("1: Buy a new PS5")
 
         # Francis gets his own unique URL
-        francis_list_url = self.browser.current_url
+        francis_list_url = self.selenium.current_url
         self.assertRegex(francis_list_url, "/lists/.+")
         self.assertNotEqual(francis_list_url, edith_list_url)
 
         # Again there is no sign of Edith's list
-        page_text = self.browser.find_element_by_tag_name("body").text
+        page_text = self.selenium.find_element_by_tag_name("body").text
         self.assertNotIn("Buy LG ultrafine display", page_text)
         self.assertIn("Buy a new PS5", page_text)
 
